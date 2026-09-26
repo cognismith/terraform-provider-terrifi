@@ -176,6 +176,10 @@ func (c *Client) DeletePortProfile(ctx context.Context, site, id string) error {
 	if errors.As(err, &nf) {
 		return nil
 	}
+	if err != nil && strings.Contains(err.Error(), "api.err.ObjectReferredByDevice") {
+		return fmt.Errorf("the port profile is still assigned to a device port (the response names the device); "+
+			"remove it from terrifi_device_ports or the UniFi UI first: %w", err)
+	}
 	if err != nil {
 		return err
 	}

@@ -733,6 +733,43 @@ resource "terrifi_device" "test" {
 	})
 }
 
+// TestAccDevicePorts_deleteAssignedProfile assigns a profile outside
+// Terraform, then removes it from the config: the controller refuses, and
+// the error says why.
+func TestAccDevicePorts_deleteAssignedProfile(t *testing.T) {
+	tg := testAccDevicePortsTarget(t)
+	suffix := randomSuffix()
+	var profileB string
+	onlyA := strings.Replace(testAccDevicePortsConfig(tg, suffix, ""), fmt.Sprintf(`
+resource "terrifi_port_profile" "b" {
+  name = "tfacc-dp-b-%s"
+}
+`, suffix), "", 1)
+
+	resource.Test(t, resource.TestCase{
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		CheckDestroy:             tg.checkDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDevicePortsConfig(tg, suffix, ""),
+				Check: func(s *terraform.State) error {
+					profileB = s.RootModule().Resources["terrifi_port_profile.b"].Primary.ID
+					return nil
+				},
+			},
+			{
+				PreConfig:   func() { require.NoError(t, tg.setPortEntry(tg.p2, map[string]any{"portconf_id": profileB})) },
+				Config:      onlyA,
+				ExpectError: regexp.MustCompile(`still assigned to a device port`),
+			},
+			{
+				PreConfig: func() { require.NoError(t, tg.setPortEntry(tg.p2, nil)) },
+				Config:    onlyA,
+			},
+		},
+	})
+}
+
 func TestAccDevicePorts_missingPort(t *testing.T) {
 	tg := testAccDevicePortsTarget(t)
 	resource.Test(t, resource.TestCase{
