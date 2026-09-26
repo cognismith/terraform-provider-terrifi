@@ -9,7 +9,7 @@ description: |-
 
 Manages a switch port profile on the UniFi controller. Port profiles are reusable port configurations (VLANs, PoE, link speed and the UI's advanced settings) that can be assigned to switch and gateway ports.
 
-A profile only defines settings. Creating or changing one doesn't affect any port until the profile is assigned to that port.
+A profile only defines settings. Creating or changing one doesn't affect any port until the profile is assigned to that port, with [`terrifi_device_ports`](device_ports.md) or in the UI.
 
 Which settings take effect depends on the device a profile is assigned to. For example, a gateway's built-in switch ports may ignore settings that a managed switch honors.
 
