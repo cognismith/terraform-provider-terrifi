@@ -8,7 +8,6 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"slices"
 	"strings"
 	"sync"
@@ -1536,9 +1535,7 @@ func TestAccPortProfile_linkSettings(t *testing.T) {
 // write. UniFi OS 5.1 / Network 10.x stores them, so this uses the hardware
 // target's controller. It still tests persistence, not device enforcement.
 func TestAccPortProfile_newerSettings(t *testing.T) {
-	if os.Getenv("TERRIFI_ACC_TARGET") != "hardware" {
-		t.Skip("the Docker controller doesn't store these settings (TERRIFI_ACC_TARGET=hardware)")
-	}
+	// Skip removed to check whether the Docker controller (10.6.106) stores these settings.
 	name := fmt.Sprintf("tfacc-pp-newer-%s", randomSuffix())
 	step := func(body string, checks ...resource.TestCheckFunc) resource.TestStep {
 		return resource.TestStep{Config: testAccPortProfileConfig(name, body), Check: resource.ComposeAggregateTestCheckFunc(checks...)}
